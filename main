@@ -1,0 +1,71 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Lab0 {
+
+    private static double[] gauss(double[][] matrix, double[] vector) {
+        int n = matrix.length;
+        for (int k = 0; k < n; k++) {
+            int maxRow = k;
+            for (int i = k + 1; i < n; i++) {
+                if (Math.abs(matrix[i][k]) > Math.abs(matrix[maxRow][k])) {
+                    maxRow = i;
+                }
+            }
+            double[] temp = matrix[k];
+            matrix[k] = matrix[maxRow];
+            matrix[maxRow] = temp;
+            double t = vector[k];
+            vector[k] = vector[maxRow];
+            vector[maxRow] = t;
+            for (int i = k + 1; i < n; i++) {
+                double factor = matrix[i][k] / matrix[k][k];
+                vector[i] -= factor * vector[k];
+                for (int j = k; j < n; j++) {
+                    matrix[i][j] -= factor * matrix[k][j];
+                }
+            }
+        }
+        double[] solution = new double[n];
+        for (int i = n - 1; i >= 0; i--) {
+            double sum = 0;
+            for (int j = i + 1; j < n; j++) {
+                sum += matrix[i][j] * solution[j];
+            }
+            solution[i] = (vector[i] - sum) / matrix[i][i];
+        }
+        return solution;
+    }
+
+    public static void main(String[] args) {
+        String inputFilePath = "input.txt";
+        String outputFIlePath = "output.txt";
+        try {
+            File inputFile = new File(inputFilePath);
+            Scanner scanner = new Scanner(inputFile);
+            int n = Integer.parseInt(scanner.nextLine());
+            double[][] matrix = new double[n][n];
+            double[] vector = new double[n];
+            for (int i = 0; i < n; i++) {
+                String[] coefficients = scanner.nextLine().split(" ");
+                for (int j = 0; j < n; j++) {
+                    matrix[i][j] = Double.parseDouble(coefficients[j]);
+                }
+                vector[i] = Double.parseDouble(coefficients[n]);
+            }
+            scanner.close();
+            double[] solution = gauss(matrix, vector);
+            FileWriter fileWriter = new FileWriter(outputFIlePath);
+            for (double s : solution) {
+                fileWriter.write(Double.toString(s));
+                fileWriter.write(System.lineSeparator());
+            }
+            fileWriter.close();
+            System.out.println("Результаты были сохранены в " + outputFIlePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
